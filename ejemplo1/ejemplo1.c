@@ -49,7 +49,7 @@ void display(void){
 }
 
 void rPolygon(float origin[2], float rad, int lados, float *coor, int iter){
-  float angle = 2*3.1416*iter/lados;
-  coor[0] = rad*cosf(angle)+origin[0];
-  coor[1] = rad*sinf(angle)+origin[1];
+  float angle = 2*3.1416*iter/lados, theta = 2*3.1416/lados;
+  coor[0] = rad*cosf(angle-theta)+origin[0];
+  coor[1] = rad*sinf(angle-theta)+origin[1];
 }
