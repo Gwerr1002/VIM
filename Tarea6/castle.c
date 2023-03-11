@@ -25,14 +25,17 @@ void display(void) {
   free(volumen);
   initDespliegue();
   //imShow(slice);
-  /*
-  int centro[2] = {150,150};
+
+  double centro[2] = {150,150};
   //imshowCaslte(unsigned char *im, float alpha, float a, float b, float c, float d, int centro[2], float radio)
-  imshowCaslte(slice, 1.5, -0.2, 0.1, 0.1, -0.2, centro, 50);
-*/
-  //
+  imshowCastel(slice, 1.5, -0.2, 0.1, 0.1, -0.2, centro, 50);
+  /*
+  double centro[2] = {150,150};
+  //imshowCaslte(unsigned char *im, float alpha, float a, float b, float c, float d, int centro[2], float radio)
+  imshowCastel(slice, 3, -0.2, -0.5, -.1, -0.2, centro, 50);
+  /*
   double centro[2] = {128,128};
   imshowCastel(slice, 3, 0, 0, 0, 0.52, centro, 100);
-  //
+  */
   free(slice);
 }

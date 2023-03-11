@@ -72,8 +72,8 @@ void shapeSlices(unsigned char *vol) {
 
 double lambda(double x, double y, double centro[2], double radio){
   double lambda = sqrt(pow(x-centro[0],2.0)+pow(y-centro[1],2.0))/(sqrt(2.0)*radio);
-  printf("%fl\n", lambda);
-  //if(lambda > 1.0){lambda = 1.0;}
+  //printf("%fl\n", lambda);
+  if(lambda > 1.0){lambda = 1.0;}
   return lambda;
 }
 
@@ -82,8 +82,10 @@ double lambda(double x, double y, double centro[2], double radio){
 void castel_angel(double *xy,int pixelx, int pixely, double alfa, double a, double b, double c, double d, double centro[2], double radio) {
   double xi = (double)pixelx, yi = (double)pixely;
   double l = lambda(xi, yi, centro, radio);
-  xy[0]=((1.0-pow(l,alfa))*((1.0+a)*xi+b*yi)+pow(l,alfa))*xi;
-  xy[1]=((1.0-pow(l,alfa))*(c*xi+(1.0+d)*yi)+pow(l,alfa))*yi;
+  xy[0]=(1-pow(l,alfa))*((1+a)*xi+b*yi)+pow(l,alfa)*xi;
+  //printf("%fl ",xy[0]);
+  xy[1]=(1-pow(l,alfa))*(c*xi+(1+d)*yi)+pow(l,alfa)*yi;
+  //printf("%fl\n",xy[1]);
 }
 
 void imshowCastel(unsigned char *im, double alpha, double a, double b, double c, double d, double centro[2], double radio) {
@@ -94,8 +96,7 @@ void imshowCastel(unsigned char *im, double alpha, double a, double b, double c,
       castel_angel(xy,x,y,alpha, a, b, c, d, centro, radio);
       glColor3f((float) im[x+x_size*y]/256,(float) im[x+x_size*y]/256,(float) im[x+x_size*y]/256);
       glBegin(GL_POINTS);
-        glVertex2i((int)xy[0],(int)xy[0]);
-        printf("%f %f\n",xy[0],xy[1]);
+        glVertex2i((int)xy[0],(int)xy[1]);
       glEnd();
     }
   }

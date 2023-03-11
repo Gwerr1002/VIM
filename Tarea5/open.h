@@ -115,6 +115,7 @@ void imShowMobius(unsigned char *im, float complex a, float complex b, float com
       Moby = mobius(y, a, b, c,d, n);
       glColor3f((float) im[x+x_size*y]/256,(float) im[x+x_size*y]/256,(float) im[x+x_size*y]/256);
       glBegin(GL_POINTS);
+      printf("%f %f\n",Mobx,Moby );
       glVertex2i(Mobx,Moby);
       glEnd();
     }
