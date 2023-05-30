@@ -37,7 +37,7 @@ void display(/* arguments */) {
   free(sig2);
   unsigned char *res = malloc(x_size * y_size * z_size);
   clean(res);
-  resta_bin(res,segment1,segment2);
+  resta_bin(res,segment2,segment1);
   printf("Segmentado\n");
   printf("Despilegue\n");
   shapeSlices(res);
