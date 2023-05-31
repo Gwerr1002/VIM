@@ -68,6 +68,7 @@ points = dsa.WrapDataObject(strip.GetOutput()).Points
 points = np.array(points)
 #%%
 points = points[::100]
+#%%
 triangles = []
 for i in range(len(points)-2):
     p1 = points[i]
