@@ -67,6 +67,7 @@ strips = strip.GetOutput().GetStrips()
 points = dsa.WrapDataObject(strip.GetOutput()).Points
 points = np.array(points)
 #%%
+points = points[::100]
 triangles = []
 for i in range(len(points)-2):
     p1 = points[i]
@@ -79,7 +80,9 @@ for i in range(len(points)-2):
         for p in pnts:
             for i in p:
                 triangles.append(i)
-
+#%%
+triangles = np.array(triangles).astype(np.float32)
+triangles.tofile("triangles")
 #%%
 p = points[::100]
 ax = plt.figure().add_subplot(projection='3d')
