@@ -40,7 +40,7 @@ fig = figure(figsize=(8, 8), dpi=120)
  
  
 # Input parameters
-nTrials = int(1E4)
+nTrials = int(6E3)
 radius = 1
 #-------------
 # Counter for the pins inside the circle
@@ -61,8 +61,8 @@ plt.legend()
  
 # Second matplotlib window
 plt.figure(2)
-plt.get_current_fig_manager().window.wm_geometry("+960+00") # move the window
-# plt.ylim(2.8,4.3)
+plt.get_current_fig_manager().window.wm_geometry("+1100+00") # move the window
+plt.ylim(2.8,4.3)
  
 # Some checks so the legend labels are only drawn once
 isFirst1 = True
