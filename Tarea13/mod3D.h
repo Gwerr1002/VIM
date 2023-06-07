@@ -5,7 +5,8 @@
 #include <unistd.h>
 #include <math.h>
 
-char name[]="triangles";
+char name[]="cerebro";
+int x_size, y_size, z_size;
 
 void init(){
   float	luz_blanca[]={1,1,1,0},luz_pos[]={1,0,0,0};
@@ -20,28 +21,88 @@ void init(){
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);	 //Habilita	 la	limpieza	de	pantalla	y	Z-Buffer
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glOrtho(-1,2,-1,2,-2,2);		//Proyección	ortográfica
+  glOrtho(-50,300,-50,300,-50,300);		//Proyección	ortográfica
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 }
 
-void cerebro(void){
+void setDimensions(int dimx,int dimy, int dimz){
+  x_size = dimx;
+  y_size = dimy;
+  z_size = dimz;
+}
+
+//-----Abrir volumen de imagenes------
+void abrirVOL(unsigned char *vol,char *name) {
   FILE *file;
-  int len = 2709333; int i = 0;
-  float num[9];
+  //256 256 190
   if ((file = fopen(name, "rb")) == NULL){
     // control del error de apertura
     printf( " Error en la apertura.\n Exit. \n ");
     exit(1);
   }
-  for (int i; i<len; i+9){
-    fread(num,sizeof(float),9,file);
-    glBegin(GL_TRIANGLES);
-      glVertex3f(num[0],num[1],num[2]);
-      glVertex3f(num[3],num[4],num[5]);
-      glVertex3f(num[6],num[7],num[8]);
-    glEnd();
+  for(int z = 0 ; z < z_size; z++){
+    for(int x = 0; x < x_size; x++){
+      for(int y = 0; y < y_size; y++){
+        fread(&vol[x+x_size*y+x_size*y_size*z],1,1,file);
+      }
+    }
   }
-  printf("Terminado\n");
   fclose (file);
+}
+
+
+
+void show3D(unsigned char *seg,unsigned char *vol){
+  float intensity, B=10,A=10,Gx,Gy,Gz,norm;
+  glBegin(GL_POINTS);
+  for (int z = 0; z < z_size; z++) {
+    for (int y = 0; y < y_size; y++) {
+      for (int x = 0; x < x_size; x++){
+        if(seg[x+x_size*y+x_size*y_size*z]>0){
+          Gx = A*cos(((float)vol[x+1+x_size*y+x_size*y_size*z]-(float)vol[x-1+x_size*y+x_size*y_size*z])/B);
+          Gy = A*cos(((float)vol[x+x_size*(y+1)+x_size*y_size*z]-(float)vol[x+x_size*(y-1)+x_size*y_size*z])/B);
+          Gz = A*cos(((float)vol[x+x_size*y+x_size*y_size*(z+1)]-(float)vol[x+x_size*y+x_size*y_size*(z-1)])/B);
+          norm = sqrt(Gx*Gx+Gy*Gy+Gz),
+          glNormal3f(Gx/norm,Gy/norm,Gz/norm);
+          glVertex3f(x,y,z);
+        }
+      }
+    }
+  }
+  glEnd();
+}
+
+void piramid() {
+  glColor3f(0,1,1);//base
+  glBegin(GL_QUADS);
+    glVertex3f(1,1,.5);
+    glVertex3f(1,1.5,.5);
+    glVertex3f(.5,1.5,.5);
+    glVertex3f(.5,1,.5);
+  glEnd();
+  glColor3f(1,0,0);
+  glBegin(GL_TRIANGLES);
+    glVertex3f(0.75,1.25,0);
+    glVertex3f(1,1,.5);
+    glVertex3f(1,1.5,.5);
+  glEnd();
+  glColor3f(0,1,0);
+  glBegin(GL_TRIANGLES);
+    glVertex3f(0.75,1.25,0);
+    glVertex3f(1,1.5,.5);
+    glVertex3f(.5,1.5,.5);
+  glEnd();
+  glColor3f(0,0,1);
+  glBegin(GL_TRIANGLES);
+    glVertex3f(0.75,1.25,0);
+    glVertex3f(.5,1.5,.5);
+    glVertex3f(.5,1,.5);
+  glEnd();
+  glColor3f(1,.5,0);
+  glBegin(GL_TRIANGLES);
+    glVertex3f(.75,1.25,0);
+    glVertex3f(.5,1,.5);
+    glVertex3f(1,1,.5);
+  glEnd();
 }

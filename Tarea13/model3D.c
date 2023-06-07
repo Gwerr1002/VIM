@@ -16,14 +16,21 @@ int main(int argc, char **argv){
 }
 
 void display(void) {
+  setDimensions(256,256,109);
+  unsigned char *segmentacion = malloc(x_size * y_size * z_size);
+  unsigned char *vol = malloc(x_size * y_size * z_size);
+  abrirVOL(segmentacion,name);
+  abrirVOL(vol,"../RMHEA109S");
   init();
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
   glRotatef(ang,1,1,0);
-  cerebro();
+  show3D(segmentacion,vol);
+  glEnd();
+  glFlush();
   glutSwapBuffers(); //Se despliega en doble buffer
 }
 void rota(void) {
-  ang += 1;
+  ang += 5;
   if (ang>360) ang = ang-360;
   glutPostRedisplay();
 }
