@@ -2,7 +2,7 @@ from slices import IndexTracker, plt, np
 import struct
 import itk,vtk
 
-"rb"
+
 with open("../RMHEA109S") as f:
     rectype = np.dtype(np.ubyte)
     data = np.fromfile(f,dtype=rectype)
@@ -13,10 +13,10 @@ im = np.reshape(data,(109,256,256))
 im_itk = itk.GetImageFromArray(np.ascontiguousarray(im))
 cerebro = itk.ConnectedThresholdImageFilter(im_itk,Lower=65,Upper=90,Seed=[155,100,89],ReplaceValue=1)
 #craneo =itk.ConnectedThresholdImageFilter(im_itk,Lower=96,Upper=255,Seed=[201,60,36],ReplaceValue=1)
-
-#saved = itk.GetArrayFromImage(cerebro).astype(np.ubyte).ravel()
-#saved.tofile("cerebro")
-
+'''
+saved = itk.GetArrayFromImage(cerebro).astype(np.ubyte).ravel()
+saved.tofile("cerebro")
+'''
 '''
 fig, ax = plt.subplots()
 tracker = IndexTracker(ax, cerebro)
@@ -46,14 +46,14 @@ ax.add_collection3d(mesh)
 ax.set_xlim(0, 100)  # a = 6 (times two for 2nd ellipsoid)
 ax.set_ylim(0, 100)  # b = 10
 ax.set_zlim(0, 300)  # c = 16
-
+'''
 #%%
 p =  verts[faces]
 strips = p.reshape(-1).astype(np.ubyte)
 strips.tofile("strips")
 
 #%%
-"""
+'''
 im_vtk = itk.vtk_image_from_image(cerebro)
 iso = vtk.vtkFlyingEdges3D()
 iso.SetInputData(im_vtk)
@@ -86,44 +86,6 @@ strip =vtk.vtkStripper()
 strip.SetInputConnection(normal.GetOutputPort())
 strip.Update()
 
-'''
-#%%
-
-from vtk.numpy_interface import dataset_adapter as dsa
-from mpl_toolkits.mplot3d import axes3d
-import matplotlib.pyplot as plt
-
-strips = strip.GetOutput().GetStrips()
-ss = strips.GetData()
-#%%
-points = dsa.WrapDataObject(strip.GetOutput()).Points
-points = np.array(points)
-#%%
-#points = points[]
-#%%
-triangles = []
-for i in range(len(points)-2):
-    p1 = points[i]
-    p2 = points[i+1]
-    p3 = points[i+2]
-    v1,v2 = p1-p2,p3-p2
-    o = np.cross(v1,v2)@[1,1,1]
-    if o != 0:
-        pnts = [p1,p2,p3]
-        for p in pnts:
-            for i in p:
-                triangles.append(i)
-#%%
-triangles = np.array(triangles).astype(np.float32)
-triangles.tofile("triangles")
-#%%
-p = points[::100]
-ax = plt.figure().add_subplot(projection='3d')
-#ax.plot_trisurf(p[:,0], p[:,1], p[:,2], linewidth=0.2, antialiased=True)
-ax.scatter(p[:,0], p[:,1], p[:,2], linewidth=0.2, antialiased=True)
-#%%
-
-'''
 iso_mapper = vtk.vtkPolyDataMapper()
 iso_mapper.SetInputConnection(strip.GetOutputPort())
 iso_mapper.ScalarVisibilityOff()
@@ -161,20 +123,9 @@ ren.GetActiveCamera().SetViewUp(1, 1, 0)
 ren.ResetCamera()
 ren.GetActiveCamera().Dolly(1.5)
 ren.ResetCameraClippingRange()
-'''
-filter = vtk.vtkRenderLargeImage()
-filter.SetMagnification(1)
-filter.SetInput(ren)
-png = vtk.vtkPNGWriter()
-png.SetFileName("logo.png")
-png.SetInputConnection(filter.GetOutputPort())
-png.Write()
-'''
+
 ren_win.SetSize(1000, 800)
 ren_win.SetWindowName('ULS Fetal')
 
 ren_win.Render()
 iren.Start()
-
-"""
-
