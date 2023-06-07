@@ -9,19 +9,23 @@ char name[]="cerebro";
 int x_size, y_size, z_size;
 
 void init(){
-  float	luz_blanca[]={1,1,1,0},luz_pos[]={1,0,0,0};
+  float	luz_1[]={1,.85,.7,0},luz_pos1[]={-500,-500,0,0};
+  float	luz_2[]={.5,.5,.5,0},luz_pos2[]={500,500,0,0};
   float	lmodel_ambient[]={1,1,1,1.0};	//Color	de	la	luz	ambiental
   float	mat_especular[]={1,1,1,1};
   glClearColor(0,0,0,0.0);			//pone	fondo	en	negro
-  glLightfv(GL_LIGHT0,	GL_POSITION,	luz_pos);
-  glLightfv(GL_LIGHT0,	GL_DIFFUSE,	luz_blanca);
+  glLightfv(GL_LIGHT0,	GL_POSITION,	luz_pos1);
+  glLightfv(GL_LIGHT0,	GL_DIFFUSE,	luz_1);
+  glLightfv(GL_LIGHT1,	GL_POSITION,	luz_pos2);
+  glLightfv(GL_LIGHT1,	GL_DIFFUSE,	luz_2);
   glEnable(GL_LIGHTING);				//Habilita	modo	iluminación	con	sombreado
   glEnable(GL_LIGHT0);						//Habilita	la	fuente	de	luz
+  glEnable(GL_LIGHT1);
   glEnable(GL_DEPTH_TEST);		//Habilita	Z-Buffer
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);	 //Habilita	 la	limpieza	de	pantalla	y	Z-Buffer
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glOrtho(-50,300,-50,300,-50,300);		//Proyección	ortográfica
+  glOrtho(-300,300,0,300,-200,300);		//Proyección	ortográfica
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 }

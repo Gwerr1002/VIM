@@ -23,7 +23,7 @@ void display(void) {
   abrirVOL(vol,"../RMHEA109S");
   init();
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-  glRotatef(ang,1,1,0);
+  glRotatef(ang,0,1,0);
   show3D(segmentacion,vol);
   glEnd();
   glFlush();
