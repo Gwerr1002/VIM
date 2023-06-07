@@ -24,6 +24,36 @@ fig.canvas.mpl_connect('scroll_event', tracker.on_scroll)
 plt.show()
 '''
 #%%
+
+import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+
+from skimage import measure
+from skimage.draw import ellipsoid
+
+saved = itk.GetArrayFromImage(cerebro)
+# Use marching cubes to obtain the surface mesh of these ellipsoids
+verts, faces, normals, values = measure.marching_cubes(saved, 0)
+#%%
+fig = plt.figure(figsize=(10, 10))
+ax = fig.add_subplot(111, projection='3d')
+
+# Fancy indexing: `verts[faces]` to generate a collection of triangles
+mesh = Poly3DCollection(verts[faces])
+mesh.set_edgecolor('k')
+ax.add_collection3d(mesh)
+ax.set_xlim(0, 100)  # a = 6 (times two for 2nd ellipsoid)
+ax.set_ylim(0, 100)  # b = 10
+ax.set_zlim(0, 300)  # c = 16
+
+#%%
+p =  verts[faces]
+strips = p.reshape(-1).astype(np.ubyte)
+strips.tofile("strips")
+
+#%%
+"""
 im_vtk = itk.vtk_image_from_image(cerebro)
 iso = vtk.vtkFlyingEdges3D()
 iso.SetInputData(im_vtk)
@@ -56,7 +86,7 @@ strip =vtk.vtkStripper()
 strip.SetInputConnection(normal.GetOutputPort())
 strip.Update()
 
-
+'''
 #%%
 
 from vtk.numpy_interface import dataset_adapter as dsa
@@ -64,10 +94,12 @@ from mpl_toolkits.mplot3d import axes3d
 import matplotlib.pyplot as plt
 
 strips = strip.GetOutput().GetStrips()
+ss = strips.GetData()
+#%%
 points = dsa.WrapDataObject(strip.GetOutput()).Points
 points = np.array(points)
 #%%
-points = points[::100]
+#points = points[]
 #%%
 triangles = []
 for i in range(len(points)-2):
@@ -91,7 +123,7 @@ ax = plt.figure().add_subplot(projection='3d')
 ax.scatter(p[:,0], p[:,1], p[:,2], linewidth=0.2, antialiased=True)
 #%%
 
-
+'''
 iso_mapper = vtk.vtkPolyDataMapper()
 iso_mapper.SetInputConnection(strip.GetOutputPort())
 iso_mapper.ScalarVisibilityOff()
@@ -144,5 +176,5 @@ ren_win.SetWindowName('ULS Fetal')
 ren_win.Render()
 iren.Start()
 
-
+"""
 
