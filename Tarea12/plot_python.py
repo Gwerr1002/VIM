@@ -11,9 +11,55 @@ im = np.array(data)
 im = np.reshape(data,(109,256,256))
 #%%
 im_itk = itk.GetImageFromArray(np.ascontiguousarray(im.astype(float)))
-cerebro = itk.ConnectedThresholdImageFilter(im_itk,Lower=65,Upper=90,Seed=[155,100,89],ReplaceValue=1)
-sm = itk.CurvatureFlowImageFilter(im_itk,NumberOfIterations = 2)
-gris =itk.ConnectedThresholdImageFilter(sm,Lower=55,Upper=68,Seed=[157,77,55],ReplaceValue=1)
+
+#%%
+import SimpleITK as sitk
+
+def downsamplePatient(im, resize_factor):
+
+    original_CT = im
+    dimension = original_CT.GetDimension()
+    reference_physical_size = np.zeros(original_CT.GetDimension())
+    reference_physical_size[:] = [(sz-1)*spc if sz*spc>mx  else mx for sz,spc,mx in zip(original_CT.GetSize(), original_CT.GetSpacing(), reference_physical_size)]
+    
+    reference_origin = original_CT.GetOrigin()
+    reference_direction = original_CT.GetDirection()
+
+    reference_size = [round(sz/resize_factor) for sz in original_CT.GetSize()] 
+    reference_spacing = [ phys_sz/(sz-1) for sz,phys_sz in zip(reference_size, reference_physical_size) ]
+
+    reference_image = sitk.Image(reference_size, original_CT.GetPixelIDValue())
+    reference_image.SetOrigin(reference_origin)
+    reference_image.SetSpacing(reference_spacing)
+    reference_image.SetDirection(reference_direction)
+
+    reference_center = np.array(reference_image.TransformContinuousIndexToPhysicalPoint(np.array(reference_image.GetSize())/2.0))
+    
+    transform = sitk.AffineTransform(dimension)
+    transform.SetMatrix(original_CT.GetDirection())
+
+    transform.SetTranslation(np.array(original_CT.GetOrigin()) - reference_origin)
+  
+    centering_transform = sitk.TranslationTransform(dimension)
+    img_center = np.array(original_CT.TransformContinuousIndexToPhysicalPoint(np.array(original_CT.GetSize())/2.0))
+    centering_transform.SetOffset(np.array(transform.GetInverse().TransformPoint(img_center) - reference_center))
+    centered_transform = sitk.CompositeTransform([transform,centering_transform])
+    #centered_transform.AddTransform(centering_transform)
+
+    # sitk.Show(sitk.Resample(original_CT, reference_image, centered_transform, sitk.sitkLinear, 0.0))
+    
+    return sitk.Resample(original_CT, reference_image, centered_transform, sitk.sitkBSpline, 0.0)
+
+cer = itk.GetArrayFromImage(im_itk)
+cer_sitk = sitk.GetImageFromArray(cer)
+res = downsamplePatient(cer_sitk, .5)
+o = sitk.GetArrayFromImage(res)
+o = itk.GetImageFromArray(o)
+#%%
+#cerebro = itk.ConnectedThresholdImageFilter(im_itk,Lower=65,Upper=90,Seed=[155,100,89],ReplaceValue=1)
+cerebroS = itk.ConnectedThresholdImageFilter(o,Lower=68,Upper=85,Seed=[284,156,132],ReplaceValue=1)
+#sm = itk.CurvatureFlowImageFilter(im_itk,NumberOfIterations = 2)
+#gris =itk.ConnectedThresholdImageFilter(sm,Lower=55,Upper=68,Seed=[157,77,55],ReplaceValue=1)
 #[113,73,70]
 '''
 #%%
@@ -21,12 +67,13 @@ saved = itk.GetArrayFromImage(cerebro).astype(np.ubyte).ravel()
 saved.tofile("mgris")
 '''
 #%%
-'''
+
 fig, ax = plt.subplots()
-tracker = IndexTracker(ax, gris)
+tracker = IndexTracker(ax, cerebroS)
 fig.canvas.mpl_connect('scroll_event', tracker.on_scroll)
 plt.show()
-'''
+
+
 #%%
 
 import numpy as np
@@ -36,7 +83,7 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from skimage import measure
 from skimage.draw import ellipsoid
 
-saved = itk.GetArrayFromImage(gris)
+saved = itk.GetArrayFromImage(o)
 # Use marching cubes to obtain the surface mesh of these ellipsoids
 verts, faces, normals, values = measure.marching_cubes(saved, 0)
 #%%
@@ -52,12 +99,13 @@ ax.set_xlim(0, 100)  # a = 6 (times two for 2nd ellipsoid)
 ax.set_ylim(0, 100)  # b = 10
 ax.set_zlim(0, 300)  # c = 16
 '''
-'''
+
 #%%
 p =  verts[faces]
-strips = p.reshape(-1).astype(np.ubyte)
-strips.tofile("stripsGris")
-'''
+strips = p.reshape(-1).astype(np.float32)
+#%%
+strips.tofile("strips2")
+
 #%%
 
 im_vtk = itk.vtk_image_from_image(cerebro)
