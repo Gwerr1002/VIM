@@ -9,17 +9,21 @@ with open("../RMHEA109S") as f:
 
 im = np.array(data)
 im = np.reshape(data,(109,256,256))
-
-im_itk = itk.GetImageFromArray(np.ascontiguousarray(im))
+#%%
+im_itk = itk.GetImageFromArray(np.ascontiguousarray(im.astype(float)))
 cerebro = itk.ConnectedThresholdImageFilter(im_itk,Lower=65,Upper=90,Seed=[155,100,89],ReplaceValue=1)
-#craneo =itk.ConnectedThresholdImageFilter(im_itk,Lower=96,Upper=255,Seed=[201,60,36],ReplaceValue=1)
+sm = itk.CurvatureFlowImageFilter(im_itk,NumberOfIterations = 2)
+gris =itk.ConnectedThresholdImageFilter(sm,Lower=55,Upper=68,Seed=[157,77,55],ReplaceValue=1)
+#[113,73,70]
 '''
+#%%
 saved = itk.GetArrayFromImage(cerebro).astype(np.ubyte).ravel()
-saved.tofile("cerebro")
+saved.tofile("mgris")
 '''
+#%%
 '''
 fig, ax = plt.subplots()
-tracker = IndexTracker(ax, cerebro)
+tracker = IndexTracker(ax, gris)
 fig.canvas.mpl_connect('scroll_event', tracker.on_scroll)
 plt.show()
 '''
@@ -32,10 +36,11 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from skimage import measure
 from skimage.draw import ellipsoid
 
-saved = itk.GetArrayFromImage(cerebro)
+saved = itk.GetArrayFromImage(gris)
 # Use marching cubes to obtain the surface mesh of these ellipsoids
 verts, faces, normals, values = measure.marching_cubes(saved, 0)
 #%%
+'''
 fig = plt.figure(figsize=(10, 10))
 ax = fig.add_subplot(111, projection='3d')
 
@@ -47,15 +52,17 @@ ax.set_xlim(0, 100)  # a = 6 (times two for 2nd ellipsoid)
 ax.set_ylim(0, 100)  # b = 10
 ax.set_zlim(0, 300)  # c = 16
 '''
+'''
 #%%
 p =  verts[faces]
 strips = p.reshape(-1).astype(np.ubyte)
-strips.tofile("strips")
-
-#%%
+strips.tofile("stripsGris")
 '''
+#%%
+
 im_vtk = itk.vtk_image_from_image(cerebro)
 iso = vtk.vtkFlyingEdges3D()
+#iso = vtk.vtkMarchingCubes()
 iso.SetInputData(im_vtk)
 iso.ComputeGradientsOn()
 iso.ComputeScalarsOn()#off
