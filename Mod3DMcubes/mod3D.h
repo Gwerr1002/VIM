@@ -5,13 +5,14 @@
 #include <unistd.h>
 #include <math.h>
 
-char name[]="strips";//strips
+char name1[]="strips";//strips
 int x_size, y_size, z_size;
 int len;
 
 void init(){
   float	luz_1[]={1,.85,.7,0},luz_pos1[]={-500,-500,0,0};
   float	luz_2[]={.5,.5,.5,0},luz_pos2[]={500,500,0,0};
+  float	luz_3[]={.4,.25,.1,0},luz_pos3[]={0,0,500,0};
   float	lmodel_ambient[]={1,1,1,1.0};	//Color	de	la	luz	ambiental
   float	mat_especular[]={1,1,1,1};
   glClearColor(0,0,0,0.0);			//pone	fondo	en	negro
@@ -19,9 +20,12 @@ void init(){
   glLightfv(GL_LIGHT0,	GL_DIFFUSE,	luz_1);
   glLightfv(GL_LIGHT1,	GL_POSITION,	luz_pos2);
   glLightfv(GL_LIGHT1,	GL_DIFFUSE,	luz_2);
+  glLightfv(GL_LIGHT2,	GL_POSITION,	luz_pos3);
+  glLightfv(GL_LIGHT2,	GL_DIFFUSE,	luz_3);
   glEnable(GL_LIGHTING);				//Habilita	modo	iluminación	con	sombreado
   glEnable(GL_LIGHT0);						//Habilita	la	fuente	de	luz
   glEnable(GL_LIGHT1);
+  glEnable(GL_LIGHT2);
   glEnable(GL_DEPTH_TEST);		//Habilita	Z-Buffer
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);	 //Habilita	 la	limpieza	de	pantalla	y	Z-Buffer
   glMatrixMode(GL_PROJECTION);
@@ -72,7 +76,7 @@ void show3D(unsigned char *seg,unsigned char *vol){
           Gx = A*cos(((float)vol[x+1+x_size*y+x_size*y_size*z]-(float)vol[x-1+x_size*y+x_size*y_size*z])/B);
           Gy = A*cos(((float)vol[x+x_size*(y+1)+x_size*y_size*z]-(float)vol[x+x_size*(y-1)+x_size*y_size*z])/B);
           Gz = A*cos(((float)vol[x+x_size*y+x_size*y_size*(z+1)]-(float)vol[x+x_size*y+x_size*y_size*(z-1)])/B);
-          norm = sqrt(Gx*Gx+Gy*Gy+Gz),
+          norm = sqrt(Gx*Gx+Gy*Gy+Gz);
           glNormal3f(Gx/norm,Gy/norm,Gz/norm);
           glVertex3f(x,y,z);
         }
@@ -85,7 +89,7 @@ void show3D(unsigned char *seg,unsigned char *vol){
 void load_poly(unsigned char *strips){
   FILE *file;
   //256 256 190
-  if ((file = fopen(name, "rb")) == NULL){
+  if ((file = fopen(name1, "rb")) == NULL){
     // control del error de apertura
     printf( " Error en la apertura.\n Exit. \n ");
     exit(1);
@@ -132,6 +136,41 @@ void show_poly(unsigned char *strips){
       calc_vector(vert_3,vert_2,v2);
       cross_prod(v1,v2,n);
       glNormal3f(n[0],n[1],n[2]);
+      glVertex3f(vert_3[0],vert_3[1],vert_3[2]);
+    glEnd();
+  }
+}
+
+void show_poly_gray(unsigned char *strips,unsigned char *vol){
+  float vert_1[3],vert_2[3],vert_3[3],Gx,Gy,Gz,norm;
+  for(int t = 0; t<len; t=t+9){
+    vert_1[0] = (float)strips[t]; vert_1[1] = (float)strips[t+1]; vert_1[2] = (float)strips[t+2];
+    vert_2[0] = (float)strips[t+3]; vert_2[1] = (float)strips[t+4]; vert_2[2] = (float)strips[t+5];
+    vert_3[0] = (float)strips[t+6]; vert_3[1] = (float)strips[t+7]; vert_3[2] = (float)strips[t+8];
+    glBegin(GL_TRIANGLES);
+      if(vert_1[0]<x_size && vert_1[1]<y_size && vert_1[2]<z_size){
+        Gx = (float)vol[(int)vert_1[0]+1+x_size*(int)vert_1[1]+x_size*y_size*(int)vert_1[2]]-(float)vol[(int)vert_1[0]-1+x_size*(int)vert_1[1]+x_size*y_size*(int)vert_1[2]];
+        Gy = (float)vol[(int)vert_1[0]+x_size*((int)vert_1[1]+1)+x_size*y_size*(int)vert_1[2]]-(float)vol[(int)vert_1[0]+x_size*((int)vert_1[1]-1)+x_size*y_size*(int)vert_1[2]];
+        Gz = (float)vol[(int)vert_1[0]+x_size*(int)vert_1[1]+x_size*y_size*((int)vert_1[2]+1)]-(float)vol[(int)vert_1[0]+x_size*(int)vert_1[1]+x_size*y_size*((int)vert_1[2]-1)];
+        norm = sqrt(Gx*Gx+Gy*Gy+Gz);
+        glNormal3f(Gx/norm,Gy/norm,Gz/norm);
+      }
+      glVertex3f(vert_1[0],vert_1[1],vert_1[2]);
+      if(vert_2[0]<x_size && vert_2[1]<y_size && vert_2[2]<z_size){
+        Gx = (float)vol[(int)vert_2[0]+1+x_size*(int)vert_2[1]+x_size*y_size*(int)vert_2[2]]-(float)vol[(int)vert_2[0]-1+x_size*(int)vert_2[1]+x_size*y_size*(int)vert_2[2]];
+        Gy = (float)vol[(int)vert_2[0]+x_size*((int)vert_2[1]+1)+x_size*y_size*(int)vert_2[2]]-(float)vol[(int)vert_2[0]+x_size*((int)vert_2[1]-1)+x_size*y_size*(int)vert_2[2]];
+        Gz = (float)vol[(int)vert_2[0]+x_size*(int)vert_2[1]+x_size*y_size*((int)vert_2[2]+1)]-(float)vol[(int)vert_2[0]+x_size*(int)vert_2[1]+x_size*y_size*((int)vert_2[2]-1)];
+        norm = sqrt(Gx*Gx+Gy*Gy+Gz);
+        glNormal3f(Gx/norm,Gy/norm,Gz/norm);
+      }
+      glVertex3f(vert_2[0],vert_2[1],vert_2[2]);
+      if(vert_3[0]<x_size && vert_3[1]<y_size && vert_3[2]<z_size){
+      Gx = (float)vol[(int)vert_3[0]+1+x_size*(int)vert_3[1]+x_size*y_size*(int)vert_3[2]]-(float)vol[(int)vert_3[0]-1+x_size*(int)vert_2[1]+x_size*y_size*(int)vert_3[2]];
+      Gy = (float)vol[(int)vert_3[0]+x_size*((int)vert_3[1]+1)+x_size*y_size*(int)vert_3[2]]-(float)vol[(int)vert_3[0]+x_size*((int)vert_2[1]-1)+x_size*y_size*(int)vert_3[2]];
+      Gz = (float)vol[(int)vert_3[0]+x_size*(int)vert_3[1]+x_size*y_size*((int)vert_3[2]+1)]-(float)vol[(int)vert_3[0]+x_size*(int)vert_2[1]+x_size*y_size*((int)vert_3[2]-1)];
+      norm = sqrt(Gx*Gx+Gy*Gy+Gz);
+      glNormal3f(Gx/norm,Gy/norm,Gz/norm);
+      }
       glVertex3f(vert_3[0],vert_3[1],vert_3[2]);
     glEnd();
   }

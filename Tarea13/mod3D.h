@@ -11,6 +11,7 @@ int x_size, y_size, z_size;
 void init(){
   float	luz_1[]={1,.85,.7,0},luz_pos1[]={-500,-500,0,0};
   float	luz_2[]={.5,.5,.5,0},luz_pos2[]={500,500,0,0};
+  float	luz_3[]={.4,.25,.1,0},luz_pos3[]={0,0,500,0};
   float	lmodel_ambient[]={1,1,1,1.0};	//Color	de	la	luz	ambiental
   float	mat_especular[]={1,1,1,1};
   glClearColor(0,0,0,0.0);			//pone	fondo	en	negro
@@ -18,9 +19,12 @@ void init(){
   glLightfv(GL_LIGHT0,	GL_DIFFUSE,	luz_1);
   glLightfv(GL_LIGHT1,	GL_POSITION,	luz_pos2);
   glLightfv(GL_LIGHT1,	GL_DIFFUSE,	luz_2);
+  glLightfv(GL_LIGHT2,	GL_POSITION,	luz_pos3);
+  glLightfv(GL_LIGHT2,	GL_DIFFUSE,	luz_3);
   glEnable(GL_LIGHTING);				//Habilita	modo	iluminación	con	sombreado
   glEnable(GL_LIGHT0);						//Habilita	la	fuente	de	luz
   glEnable(GL_LIGHT1);
+  glEnable(GL_LIGHT2);
   glEnable(GL_DEPTH_TEST);		//Habilita	Z-Buffer
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);	 //Habilita	 la	limpieza	de	pantalla	y	Z-Buffer
   glMatrixMode(GL_PROJECTION);
@@ -58,16 +62,16 @@ void abrirVOL(unsigned char *vol,char *name) {
 
 
 void show3D(unsigned char *seg,unsigned char *vol){
-  float intensity, B=10,A=10,Gx,Gy,Gz,norm;
+  float Gx,Gy,Gz,norm;
   glBegin(GL_POINTS);
   for (int z = 0; z < z_size; z++) {
     for (int y = 0; y < y_size; y++) {
       for (int x = 0; x < x_size; x++){
         if(seg[x+x_size*y+x_size*y_size*z]>0){
-          Gx = A*cos(((float)vol[x+1+x_size*y+x_size*y_size*z]-(float)vol[x-1+x_size*y+x_size*y_size*z])/B);
-          Gy = A*cos(((float)vol[x+x_size*(y+1)+x_size*y_size*z]-(float)vol[x+x_size*(y-1)+x_size*y_size*z])/B);
-          Gz = A*cos(((float)vol[x+x_size*y+x_size*y_size*(z+1)]-(float)vol[x+x_size*y+x_size*y_size*(z-1)])/B);
-          norm = sqrt(Gx*Gx+Gy*Gy+Gz),
+          Gx = (float)vol[x+1+x_size*y+x_size*y_size*z]-(float)vol[x-1+x_size*y+x_size*y_size*z];
+          Gy = (float)vol[x+x_size*(y+1)+x_size*y_size*z]-(float)vol[x+x_size*(y-1)+x_size*y_size*z];
+          Gz = (float)vol[x+x_size*y+x_size*y_size*(z+1)]-(float)vol[x+x_size*y+x_size*y_size*(z-1)];
+          norm = sqrt(Gx*Gx+Gy*Gy+Gz);
           glNormal3f(Gx/norm,Gy/norm,Gz/norm);
           glVertex3f(x,y,z);
         }

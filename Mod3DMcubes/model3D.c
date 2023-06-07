@@ -7,7 +7,7 @@ float ang = 0; //declaración global
 int main(int argc, char **argv){
   glutInit(&argc,argv);
   glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGB|GLUT_DEPTH);
-  glutInitWindowSize(600,400);
+  glutInitWindowSize(1500,650);
   glutInitWindowPosition(500,100);
   glutCreateWindow("Demo");
   glutDisplayFunc(display);
@@ -25,6 +25,7 @@ void display(void) {
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
   glRotatef(ang,0,1,0);
   show_poly(strips);
+  free(strips);
   glEnd();
   glFlush();
   glutSwapBuffers(); //Se despliega en doble buffer

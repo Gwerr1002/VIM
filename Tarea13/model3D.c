@@ -7,7 +7,7 @@ float ang = 0; //declaración global
 int main(int argc, char **argv){
   glutInit(&argc,argv);
   glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGB|GLUT_DEPTH);
-  glutInitWindowSize(640,480);
+  glutInitWindowSize(600,300);
   glutInitWindowPosition(500,100);
   glutCreateWindow("Demo");
   glutDisplayFunc(display);
